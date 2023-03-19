@@ -106,6 +106,20 @@ do
                             echo "==== Create new semester ===="
                             create_semester
                             ;;
+                        2)
+                            echo "==== View Semesters ===="
+                            INPUT=semester.csv
+                            count=0
+                            OLDIFS=$IFS
+                            IFS=','
+                            [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+                            while read semester
+                            do
+                                count=`expr $count + 1`
+                                echo "$count : $semester"
+                            done < $INPUT
+                            IFS=$OLDIFS
+                            ;;
                         3)
                             echo "==== Create new Course ===="
                             create_course
@@ -145,6 +159,7 @@ do
                             fi
                             ;;
                         *)
+                            
                             ;;
                     esac
                     # Ask user if they want to continue
