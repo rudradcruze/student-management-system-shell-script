@@ -59,6 +59,21 @@ function create_course() {
     fi
 }
 
+function view_single() {
+    echo "==== View $1 ===="
+    INPUT=$1.csv
+    count=0
+    OLDIFS=$IFS
+    IFS=','
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+    while read value
+    do
+        count=`expr $count + 1`
+        echo "$count : $value"
+    done < $INPUT
+    IFS=$OLDIFS
+}
+
 # main program
 choice="y"
 while [ $choice == "y" ] || [ $choice == "Y" ]
@@ -107,18 +122,7 @@ do
                             create_semester
                             ;;
                         2)
-                            echo "==== View Semesters ===="
-                            INPUT=semester.csv
-                            count=0
-                            OLDIFS=$IFS
-                            IFS=','
-                            [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
-                            while read semester
-                            do
-                                count=`expr $count + 1`
-                                echo "$count : $semester"
-                            done < $INPUT
-                            IFS=$OLDIFS
+                            view_single semester
                             ;;
                         3)
                             echo "==== Create new Course ===="
