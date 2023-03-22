@@ -74,6 +74,29 @@ function view_single() {
     IFS=$OLDIFS
 }
 
+function view_courses() {
+    echo "==== View Courses ===="
+    echo "Sl: ID      Name              Teacher"
+    INPUT=course.csv
+    INPUTTEACHER=teacher.csv
+    count=0
+    OLDIFS=$IFS
+    IFS=','
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+    while read course_id course_name teacher_id
+    do
+        count=`expr $count + 1`
+        while read file_teacher_id file_teacher_name
+        do
+            if [ "$file_teacher_id" == "$teacher_id" ]
+            then
+                echo "$count : $course_id, $course_name, $file_teacher_name"
+            fi
+        done < $INPUTTEACHER
+    done < $INPUT
+    IFS=$OLDIFS
+}
+
 # main program
 choice="y"
 while [ $choice == "y" ] || [ $choice == "Y" ]
@@ -99,7 +122,7 @@ do
                 while [ $choice == "y" ] || [ $choice == "Y" ]
                 do
                     clear
-                    banner smt
+                    banner sms
                     echo "==== Admin menu ===="
                     echo "1. Create Semester"
                     echo "2. View Semesters"
@@ -129,15 +152,26 @@ do
                             create_course
                             echo "Course Create Successfully"
                             ;;
+                        4)
+                            view_courses
+                            ;;
                         5)
                             clear
                             echo "==== Create new teacher ===="
                             create_objects teacher
                             ;;
+                        6)
+                            clear
+                            view_single teacher
+                            ;;
                         7)
                             clear
                             echo "==== Create new student ===="
                             create_objects student
+                            ;;
+                        8)
+                            clear
+                            view_single student
                             ;;
                         10)
                             echo "==== Add teacher into the course ===="
@@ -171,13 +205,16 @@ do
                     read choice
                 done
                 echo "exit form admin"
+            else
+                echo "Invalid credentials"
             fi
             ;;
         *)
+            echo "Invalid Input"
             ;;
     esac
 
     # Ask user if they want to continue
     echo "Do you want to continue [y/n]: "
-    read choice;
+    read choice
 done
