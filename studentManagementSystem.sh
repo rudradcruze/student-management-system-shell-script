@@ -134,12 +134,49 @@ function view_courses() {
     IFS=$OLDIFS
 }
 
+function enroll_course() {
+    echo "Enter course id:"
+    read user_course_id
+    echo "Enter student id:"
+    read user_student_id
+    echo "Enter semester (Spring-2023):"
+    read user_semester
+
+    return_exsist semester $user_semester
+    semesterExsist=$?
+
+    return_exsist student $user_student_id
+    studentExsist=$?
+
+    return_exsist course $user_course_id
+    courseExsist=$?
+
+    if [ $semesterExsist != 1 ]; then
+        echo "Semester doesn't exsist"
+    else
+        if [ $studentExsist != 1 ]; then
+            echo "Student doesn't exsist"
+        else
+            if [ $courseExsist != 1 ]; then
+                echo "Course doesn't exsist"
+            else
+                echo "$user_course_id,$user_student_id,$user_semester,0,0,0,0" >> courseEnroll.csv
+                echo "Student Successfully Enroll into the course" 
+            fi
+        fi
+    fi
+}
+
+function head_banner() {
+    clear
+    banner SMS
+}
+
 # main program
 choice="y"
 while [ $choice == "y" ] || [ $choice == "Y" ]
 do
-    clear
-    banner smt
+    head_banner
     echo "Enter the user type"
     echo "1. Admin"
     echo "2. Teacher"
@@ -158,8 +195,7 @@ do
                 choice="y"
                 while [ $choice == "y" ] || [ $choice == "Y" ]
                 do
-                    clear
-                    banner sms
+                    head_banner
                     echo "==== Admin menu ===="
                     echo "1. Create Semester"
                     echo "2. View Semesters"
@@ -178,68 +214,54 @@ do
 
                     case "$choice" in
                         1)
+                            head_banner
                             echo "==== Create new semester ===="
                             create_semester
                             ;;
                         2)
+                            head_banner
                             echo "==== View semester ===="
                             cat -b semester.csv
                             ;;
                         3)
+                            head_banner
                             echo "==== Create new Course ===="
                             create_course
                             echo "Course Create Successfully"
                             ;;
                         4)
-                            clear
+                            head_banner
                             view_courses
                             ;;
                         5)
-                            clear
+                            head_banner
                             echo "==== Create new teacher ===="
                             create_objects teacher
                             ;;
                         6)
-                            clear
+                            head_banner
                             echo "==== View teacher ===="
                             cat -b teacher.csv
                             ;;
                         7)
-                            clear
+                            head_banner
                             echo "==== Create new student ===="
                             create_objects student
                             ;;
                         8)
-                            clear
+                            head_banner
                             echo "==== View students ===="
                             cat -b student.csv
                             ;;
                         9)
+                            head_banner
                             echo "==== Modify Course Teacher ===="
                             modify_teacher
                             ;;
                         10)
-                            echo "==== Add teacher into the course ===="
-                            echo "Enter course id:"
-                            read course_id
-                            echo "Enter student id:"
-                            read student_id
-                            echo "Enter semester (Spring-2023):"
-                            read user_semester
-
-                            return_exsist semester $user_semester
-                            semesterExsist=$?
-
-                            return_exsist student $student_id
-                            studentExsist=$?
-
-                            return_exsist course $course_id
-                            courseExsist=$?
-
-                            if [ $semesterExsist == 1 ] && [ $studentExsist == 1 ] && [ $courseExsist == 1 ]
-                            then
-                                echo "yes you can enroll"
-                            fi
+                            head_banner
+                            echo "==== Enroll into the course ===="
+                            enroll_course
                             ;;
                         11)
                             exit
