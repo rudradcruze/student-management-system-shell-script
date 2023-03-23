@@ -87,21 +87,21 @@ function modify_teacher() {
 
 function view_courses() {
     echo "==== View Courses ===="
-    echo "Sl: ID      Name              Teacher"
+    echo "Sl: ID      Name                 Semester      Teacher"
     INPUT=course.csv
     INPUTTEACHER=teacher.csv
     count=0
     OLDIFS=$IFS
     IFS=','
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
-    while read course_id course_name teacher_id
+    while read course_id course_name semester teacher_id
     do
         count=`expr $count + 1`
         while read file_teacher_id file_teacher_name
         do
             if [ "$file_teacher_id" == "$teacher_id" ]
             then
-                echo "$count : $course_id, $course_name, $file_teacher_name"
+                echo "$count : $course_id  $course_name     $semester   $file_teacher_name"
             fi
         done < $INPUTTEACHER
     done < $INPUT
@@ -156,7 +156,7 @@ do
                             create_semester
                             ;;
                         2)
-                            cho "==== View semester ===="
+                            echo "==== View semester ===="
                             cat -b semester.csv
                             ;;
                         3)
@@ -165,7 +165,6 @@ do
                             echo "Course Create Successfully"
                             ;;
                         4)
-                            cho "==== View Courses ===="
                             view_courses
                             ;;
                         5)
