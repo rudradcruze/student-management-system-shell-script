@@ -59,19 +59,13 @@ function create_course() {
     fi
 }
 
-function view_single() {
-    echo "==== View $1 ===="
-    INPUT=$1.csv
-    count=0
-    OLDIFS=$IFS
-    IFS=','
-    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
-    while read value
-    do
-        count=`expr $count + 1`
-        echo "$count : $value"
-    done < $INPUT
-    IFS=$OLDIFS
+function modify_teacher() {
+    echo "Enter course id:"
+    read course_id
+    echo "Enter course name:"
+    read course_name
+    echo "Enter teacher id:"
+    read user_teacher_id
 }
 
 function view_courses() {
@@ -145,7 +139,8 @@ do
                             create_semester
                             ;;
                         2)
-                            view_single semester
+                            cho "==== View semester ===="
+                            cat -b semester.csv
                             ;;
                         3)
                             echo "==== Create new Course ===="
@@ -153,6 +148,7 @@ do
                             echo "Course Create Successfully"
                             ;;
                         4)
+                            cho "==== View Courses ===="
                             view_courses
                             ;;
                         5)
@@ -162,7 +158,7 @@ do
                             ;;
                         6)
                             clear
-                            view_single teacher
+                            cat -b teacher.csv
                             ;;
                         7)
                             clear
