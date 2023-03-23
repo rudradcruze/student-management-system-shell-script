@@ -49,23 +49,40 @@ function create_course() {
     read course_name
     echo "Enter teacher id:"
     read user_teacher_id
+    echo "Enter sesmster(Spring-2023):"
+    read semester
 
     return_exsist teacher $user_teacher_id
     reaturn_value_teacher=$?
 
+    return_exsist semester $semester
+    reaturn_value_semester=$?
+
     if [ $reaturn_value_teacher == 1 ]
     then
-        echo "$course_id,$course_name,$user_teacher_id" >> course.csv 
+        if [ $reaturn_value_semester == 1 ]
+        then
+            echo "$course_id,$course_name,$semester,$user_teacher_id" >> course.csv
+        else
+            echo "Semester doesn't exsist"
+        fi
+    else
+        echo "Teacher doesn't exsist"
     fi
 }
 
 function modify_teacher() {
     echo "Enter course id:"
     read course_id
-    echo "Enter course name:"
-    read course_name
-    echo "Enter teacher id:"
-    read user_teacher_id
+    echo "Enter new teacher id:"
+    read user_new_teacher_id
+
+    return_exsist teacher $user_new_teacher_id
+    reaturn_value_teacher=$?
+    if [ $reaturn_value_teacher == 1 ]
+    then
+        echo "I am exsist"
+    fi
 }
 
 function view_courses() {
@@ -168,6 +185,9 @@ do
                         8)
                             clear
                             view_single student
+                            ;;
+                        9)
+                            modify_teacher
                             ;;
                         10)
                             echo "==== Add teacher into the course ===="
