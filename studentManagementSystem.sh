@@ -22,24 +22,25 @@ function create_user() {
     fi
 }
 
-function return_exsist() {
+function return_function_value() {
     INPUT=$1.csv
+    count=0
     OLDIFS=$IFS
     IFS=','
-
-    if [ ! -f $INPUT ]
-    then
-        echo "$INPUT file not found"; exit;
-    fi
-
-    while read id name
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+    while read id name ex ex1
     do
-        if [ $2 == $id ]
+        if [ "$2" == "$id" ]
         then
-            return 1
+            function_return_value="$name"
+            break
         fi
     done < $INPUT
     IFS=$OLDIFS
+    if [[ $function_return_value == "" ]];
+    then 
+        function_return_value=0
+    fi
 }
 
 function create_course() {
@@ -52,15 +53,15 @@ function create_course() {
     echo "Enter sesmster(Spring-2023):"
     read semester
 
-    return_exsist teacher $user_teacher_id
-    reaturn_value_teacher=$?
+    return_function_value teacher $user_teacher_id
+    reaturn_value_teacher=$function_return_value
 
-    return_exsist semester $semester
-    reaturn_value_semester=$?
+    return_function_value semester $semester
+    reaturn_value_semester=$function_return_value
 
-    if [ $reaturn_value_teacher == 1 ]
+    if [ $reaturn_value_teacher != 0 ]
     then
-        if [ $reaturn_value_semester == 1 ]
+        if [ $reaturn_value_semester != 0 ]
         then
             echo "$course_id,$course_name,$semester,$user_teacher_id" >> course.csv
         else
@@ -80,10 +81,10 @@ function modify_teacher() {
     echo "Enter new teacher id:"
     read user_new_teacher_id
 
-    return_exsist teacher $user_new_teacher_id
-    reaturn_value_teacher=$?
+    return_function_value teacher $user_new_teacher_id
+    reaturn_value_teacher=$function_return_value
 
-    if [ $reaturn_value_teacher == 1 ]
+    if [ $reaturn_value_teacher != 0 ]
     then
         INPUT=course.csv
         count=0
@@ -115,21 +116,18 @@ function view_courses() {
     echo "Sl: ID      Name                 Semester      Teacher"
     INPUT=course.csv
     INPUTTEACHER=teacher.csv
-    count=0
+    counting=0
     OLDIFS=$IFS
     IFS=','
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
     [ ! -f $INPUTTEACHER ] && { echo "$INPUTTEACHER file not found"; exit; }
     while read course_id course_name semester teacher_id
     do
-        count=`expr $count + 1`
-        while read file_teacher_id file_teacher_name
-        do
-            if [ "$file_teacher_id" == "$teacher_id" ]
-            then
-                echo "$count : $course_id  $course_name     $semester   $file_teacher_name"
-            fi
-        done < $INPUTTEACHER
+        counting=`expr $counting + 1`
+        return_function_value teacher $teacher_id
+        file_teacher_name=$function_return_value
+
+        echo "$counting : $course_id  $course_name     $semester   $file_teacher_name"
     done < $INPUT
     IFS=$OLDIFS
 }
@@ -142,22 +140,22 @@ function enroll_course() {
     echo "Enter semester (Spring-2023):"
     read user_semester
 
-    return_exsist semester $user_semester
-    semesterExsist=$?
+    return_function_value semester $user_semester
+    semesterExsist=$function_return_value
 
-    return_exsist student $user_student_id
-    studentExsist=$?
+    return_function_value student $user_student_id
+    studentExsist=$function_return_value
 
-    return_exsist course $user_course_id
-    courseExsist=$?
+    return_function_value course $user_course_id
+    courseExsist=$function_return_value
 
-    if [ $semesterExsist != 1 ]; then
+    if [ $semesterExsist == 0 ]; then
         echo "Semester doesn't exsist"
     else
-        if [ $studentExsist != 1 ]; then
+        if [ $studentExsist == 0 ]; then
             echo "Student doesn't exsist"
         else
-            if [ $courseExsist != 1 ]; then
+            if [ $courseExsist == 0 ]; then
                 echo "Course doesn't exsist"
             else
                 echo "$user_course_id,$user_student_id,$user_semester,0,0,0,0" >> courseEnroll.csv
@@ -170,6 +168,31 @@ function enroll_course() {
 function head_banner() {
     clear
     banner SMS
+}
+
+function view_course_enrollments() {
+    echo "Sl: SID      SName                 Semester      Course Name"
+    INPUT=courseEnroll.csv
+    INPUTCOURSE=course.csv
+    INPUTSTUDENT=student.csv
+    count=0
+    OLDIFS=$IFS
+    IFS=','
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+    [ ! -f $INPUTCOURSE ] && { echo "$INPUTTEACHER file not found"; exit; }
+    [ ! -f $INPUTSTUDENT ] && { echo "$INPUTTEACHER file not found"; exit; }
+    while read course_id student_id semester attendance quiz midterm final
+    do
+        count=`expr $count + 1`
+        # while read file_teacher_id file_teacher_name
+        # do
+        #     if [ "$file_teacher_id" == "$teacher_id" ]
+        #     then
+        #         echo "$count : $course_id  $course_name     $semester   $file_teacher_name"
+        #     fi
+        # done < $INPUTTEACHER
+    done < $INPUT
+    IFS=$OLDIFS
 }
 
 # main program
@@ -207,6 +230,7 @@ do
                     echo "8. View Students"
                     echo "9. Modify course teacher"
                     echo "10. Enroll students into the course"
+                    echo "11. View Students Course Enrollments"
                     echo "11. Exit"
                     echo "Please enter your choice:"
                     
@@ -264,6 +288,11 @@ do
                             enroll_course
                             ;;
                         11)
+                            head_banner
+                            echo "==== View Student Course Enrollment ===="
+                            view_course_enrollments               
+                            ;;
+                        12)
                             exit
                             ;;
                         *)
