@@ -173,24 +173,20 @@ function head_banner() {
 function view_course_enrollments() {
     echo "Sl: SID      SName                 Semester      Course Name"
     INPUT=courseEnroll.csv
-    INPUTCOURSE=course.csv
-    INPUTSTUDENT=student.csv
-    count=0
+    counting_course_enroll_view=0
     OLDIFS=$IFS
     IFS=','
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
-    [ ! -f $INPUTCOURSE ] && { echo "$INPUTTEACHER file not found"; exit; }
-    [ ! -f $INPUTSTUDENT ] && { echo "$INPUTTEACHER file not found"; exit; }
     while read course_id student_id semester attendance quiz midterm final
     do
-        count=`expr $count + 1`
-        # while read file_teacher_id file_teacher_name
-        # do
-        #     if [ "$file_teacher_id" == "$teacher_id" ]
-        #     then
-        #         echo "$count : $course_id  $course_name     $semester   $file_teacher_name"
-        #     fi
-        # done < $INPUTTEACHER
+        counting_course_enroll_view=`expr $counting_course_enroll_view + 1`
+        return_function_value course $course_id
+        course_enrollment_course_name=$function_return_value
+        return_function_value student $student_id
+        course_enrollment_student_name=$function_return_value
+
+        echo "$counting_course_enroll_view : $student_id     $course_enrollment_student_name $semester   $course_enrollment_course_name" 
+
     done < $INPUT
     IFS=$OLDIFS
 }
@@ -231,7 +227,7 @@ do
                     echo "9. Modify course teacher"
                     echo "10. Enroll students into the course"
                     echo "11. View Students Course Enrollments"
-                    echo "11. Exit"
+                    echo "12. Exit"
                     echo "Please enter your choice:"
                     
                     read choice
