@@ -101,14 +101,49 @@ function modify_teacher() {
             fi
         done < $INPUT
         IFS=$OLDIFS
+
         echo "Teacher susccessfully modifyed"
+        
+        # Remove the previous file and rename the exsisting file.
+        rm course.csv
+        mv temp_course.csv course.csv
     else
         echo "Teacher dosen't exsist"
     fi
+}
 
-    # Remove the previous file and rename the exsisting file.
-    rm course.csv
-    mv temp_course.csv course.csv
+function delete_student() {
+    echo "Enter student id:"
+    read user_delete_student_id
+
+    return_function_value student $user_delete_student_id
+    reaturn_value_delete_student=$function_return_value
+
+    if [ $reaturn_value_delete_student != 0 ]
+    then
+        INPUT=student.csv
+        count=0
+        OLDIFS=$IFS
+        IFS=','
+        [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+        while read delete_file_s_id delete_file_s_name
+        do
+            if [ $user_delete_student_id != $delete_file_s_id ]
+            then
+                echo "$delete_file_s_id,$delete_file_s_name" >> tempDeleteStudent.csv
+            fi
+        done < $INPUT
+        IFS=$OLDIFS
+        
+        echo "Student Successfully Delete"
+
+        # Remove the previous file and rename the exsisting file.
+        rm student.csv
+        mv tempDeleteStudent.csv student.csv
+    else
+        echo "Student not exsist"
+        exit
+    fi
 }
 
 function view_courses() {
@@ -227,7 +262,8 @@ do
                     echo "9. Modify course teacher"
                     echo "10. Enroll students into the course"
                     echo "11. View Students Course Enrollments"
-                    echo "12. Exit"
+                    echo "12. Delete Student"
+                    echo "13. Exit"
                     echo "Please enter your choice:"
                     
                     read choice
@@ -289,6 +325,11 @@ do
                             view_course_enrollments               
                             ;;
                         12)
+                            head_banner
+                            echo "==== Delete Student ===="
+                            delete_student
+                            ;;
+                        13)
                             exit
                             ;;
                         *)
