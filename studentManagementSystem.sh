@@ -226,6 +226,35 @@ function view_course_enrollments() {
     IFS=$OLDIFS
 }
 
+function teacher_course_enrolled_students() {
+    echo "Sl: SID      Name                  Semester      CID        Course Name"
+    INPUT=courseEnroll.csv
+    INPUTCOURSE=course.csv
+    counting_course_enrolld_student_view=0
+    OLDIFS=$IFS
+    IFS=','
+
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+    [ ! -f $INPUTCOURSE ] && { echo "$INPUTCOURSE file not found"; exit; }
+
+    while read course_id student_id semester attendance quiz midterm final
+    do
+        counting_course_enrolld_student_view=`expr $counting_course_enrolld_student_view + 1`
+
+        while read course_course_id course_course_name course_semester course_teacher_id
+        do
+            if [ $course_id == $course_course_id ] && [ $semester == $course_semester ] && [ $1 == $course_teacher_id ]
+            then
+                return_function_value student $student_id
+                teacher_course_enrolled_student_name=$function_return_value
+
+                echo "$counting_course_enrolld_student_view : $student_id     $teacher_course_enrolled_student_name $semester   $course_course_id     $course_course_name" 
+            fi
+        done < $INPUTCOURSE
+    done < $INPUT
+    IFS=$OLDIFS
+}
+
 # main program
 choice="y"
 while [ $choice == "y" ] || [ $choice == "Y" ]
@@ -374,7 +403,7 @@ do
                         1)
                             head_banner
                             echo "==== View teacher course enrolled students ===="
-                            
+                            teacher_course_enrolled_students $teacher_id_for_teacher
                             ;;
                         3)
                             exit
@@ -383,7 +412,11 @@ do
                             echo "Invalid input"
                             ;;
                     esac
+                    # Ask user if they want to continue
+                    echo "Do you want to continue [y/n]: "
+                    read choice
                 done
+                echo "Exsit form teacher"
             fi
             ;;
         *)
