@@ -345,6 +345,47 @@ do
                 echo "Invalid credentials"
             fi
             ;;
+        2)
+            echo "Enter teacher id: "
+            read teacher_id_for_teacher
+            
+            return_function_value teacher $teacher_id_for_teacher
+            teacher_teacher_exsist_entry=$function_return_value
+
+            if [ $teacher_teacher_exsist_entry == 0 ]
+            then
+                echo "Teacher not exsist"
+            else
+                #repeating teacher choice
+                choice="y"
+                while [ $choice == "y" ] || [ $choice == "Y" ]
+                do
+                    head_banner
+                    echo "Welcome $teacher_teacher_exsist_entry"
+                    echo "==== Teacher menu ===="
+                    echo "1. View Enroll Stdents"
+                    echo "2. Update Student Marks"
+                    echo "3. Exit"
+                    echo "Please enter your choice:"
+                    
+                    read choice
+
+                    case "$choice" in
+                        1)
+                            head_banner
+                            echo "==== View teacher course enrolled students ===="
+                            
+                            ;;
+                        3)
+                            exit
+                            ;;
+                        *)
+                            echo "Invalid input"
+                            ;;
+                    esac
+                done
+            fi
+            ;;
         *)
             echo "Invalid Input"
             ;;
