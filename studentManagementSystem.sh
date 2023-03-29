@@ -3,12 +3,13 @@
 function head_banner() {
     clear
     banner SMS
+    echo "Developed by (social media domain)/rudradcruze [All rights reserved]"
 }
 
 function return_function_value() {
     INPUT=$1.csv
-    count=0
     OLDIFS=$IFS
+    function_return_value=0
     IFS=','
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
     while read id name ex ex1
@@ -28,10 +29,6 @@ function return_function_value() {
         fi
     done < $INPUT
     IFS=$OLDIFS
-    if [[ $function_return_value == "" ]];
-    then 
-        function_return_value=0
-    fi
 }
 
 function create_semester() {
@@ -60,11 +57,20 @@ function create_user() {
     read user_id
     echo "Enter $1 name:"
     read user_name
-    if [ $1 == "teacher" ]
+
+    return_function_value $1 $user_id 1
+    local get_return_user_id=$function_return_value
+
+    if [ $get_return_user_id != $user_id ]
     then
-        echo "$user_id,$user_name" >> teacher.csv 
-    else 
-        echo "$user_id,$user_name" >> student.csv 
+        if [ $1 == "teacher" ]
+        then
+            echo "$user_id,$user_name" >> teacher.csv 
+        else 
+            echo "$user_id,$user_name" >> student.csv 
+        fi
+    else
+        echo "$user_id is already exsist in $1 table"
     fi
 }
 
@@ -116,7 +122,6 @@ function modify_teacher() {
     if [ $reaturn_value_teacher != 0 ]
     then
         INPUT=course.csv
-        count=0
         OLDIFS=$IFS
         IFS=','
         [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
@@ -177,23 +182,47 @@ function delete_student() {
     fi
 }
 
+function return_course_count() {
+    INPUT=courseEnroll.csv
+    local return_course_cunt_value=0
+    OLDIFS=$IFS
+    IFS=','
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+    while read course_id student_id semester attendance quiz mid final
+    do
+
+        if [ $course_id == $1 ]
+        then
+            return_course_cunt_value=`expr $return_course_cunt_value + 1`
+        fi
+    done < $INPUT
+    IFS=$OLDIFS
+    return $return_course_cunt_value
+}
+
 function view_courses() {
-    echo "==== View Courses ===="
-    echo -e "Sl: ID\t\tName\t\t\tSemester\tTeacher Id\tTeacher\tName"
+    echo -e "=================================== View Courses ===================================\n"
+    echo -e "Sl: ID\t\tName\t\t\tSemester\tTeacher Id\tTeacher\tName\tEnrolled Students\n"
     INPUT=course.csv
-    INPUTTEACHER=teacher.csv
-    counting=0
+    local counting=0
     OLDIFS=$IFS
     IFS=','
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
     [ ! -f $INPUTTEACHER ] && { echo "$INPUTTEACHER file not found"; exit; }
     while read course_id course_name semester teacher_id
     do
+        local temp_course_id=$course_id
+        local temp_semester=$semester
+
         counting=`expr $counting + 1`
         return_function_value teacher $teacher_id 2
         file_teacher_name=$function_return_value
 
-        echo -e "$counting : $course_id\t$course_name\t$semester\t$teacher_id\t\t$file_teacher_name"
+        return_course_count $course_id
+        local course_count=$?
+
+        echo -e "$counting : $temp_course_id\t$course_name\t$temp_semester\t$teacher_id\t\t$file_teacher_name\t\t$course_count"
+        
     done < $INPUT
     IFS=$OLDIFS
 }
@@ -335,20 +364,27 @@ do
                 while [ $choice == "y" ] || [ $choice == "Y" ]
                 do
                     head_banner
-                    echo "==== Admin menu ===="
-                    echo "1. Create Semester"
-                    echo "2. View Semesters"
-                    echo "3. Create Course"
-                    echo "4. View Courses"
-                    echo "5. Create Teacher"
-                    echo "6. View Teachers"
-                    echo "7. Create Student"
-                    echo "8. View Students"
-                    echo "9. Modify course teacher"
-                    echo "10. Enroll students into the course"
-                    echo "11. View Students Course Enrollments"
-                    echo "12. Delete Student"
-                    echo "13. Exit"
+                    echo "=============== Admin menu ==============="
+                    echo -e "=\t\t\t\t\t ="
+                    echo "===============  User Work ==============="
+                    echo -e "=\t\t\t\t\t ="
+                    echo -e "= 1.  Create Teacher\t\t\t ="
+                    echo -e "= 2.  View Teachers\t\t\t ="
+                    echo -e "= 3.  Create Student\t\t\t ="
+                    echo -e "= 4.  View Students\t\t\t ="
+                    echo -e "=\t\t\t\t\t ="
+                    echo "=============== Course Work =============="
+                    echo -e "=\t\t\t\t\t ="
+                    echo -e "= 5.  Create Semester\t\t\t ="
+                    echo -e "= 6.  View Semesters\t\t\t ="
+                    echo -e "= 7.  Create Course\t\t\t ="
+                    echo -e "= 8.  View Courses\t\t\t ="
+                    echo -e "= 9.  Modify course teacher\t\t ="
+                    echo -e "= 10. Enroll students into the course\t ="
+                    echo -e "= 11. View Students Course Enrollments\t ="
+                    echo -e "= 12. Delete Student\t\t\t ="
+                    echo -e "= 13. Exit\t\t\t\t ="
+                    echo "=========================================="
                     echo "Please enter your choice:"
                     
                     read choice
@@ -356,42 +392,42 @@ do
                     case "$choice" in
                         1)
                             head_banner
-                            echo "==== Create new semester ===="
-                            create_semester
-                            ;;
-                        2)
-                            head_banner
-                            echo "==== View semester ===="
-                            cat -b semester.csv
-                            ;;
-                        3)
-                            head_banner
-                            echo "==== Create new Course ===="
-                            create_course
-                            ;;
-                        4)
-                            head_banner
-                            view_courses
-                            ;;
-                        5)
-                            head_banner
                             echo "==== Create new teacher ===="
                             create_user teacher
                             ;;
-                        6)
+                        2)
                             head_banner
                             echo "==== View teacher ===="
                             cat -b teacher.csv
                             ;;
-                        7)
+                        3)
                             head_banner
                             echo "==== Create new student ===="
                             create_user student
                             ;;
-                        8)
+                        4)
                             head_banner
                             echo "==== View students ===="
                             cat -b student.csv
+                            ;;
+                        5)
+                            head_banner
+                            echo "==== Create new semester ===="
+                            create_semester
+                            ;;
+                        6)
+                            head_banner
+                            echo "==== View semester ===="
+                            cat -b semester.csv
+                            ;;
+                        7)
+                            head_banner
+                            echo "==== Create new Course ===="
+                            create_course
+                            ;;
+                        8)
+                            head_banner
+                            view_courses
                             ;;
                         9)
                             head_banner
@@ -421,7 +457,7 @@ do
                             ;;
                     esac
                     # Ask user if they want to continue
-                    echo "Do you want to continue [y/n]: "
+                    echo -e "\nDo you want to continue [y/n]: "
                     read choice
                 done
                 echo "exit form admin"
@@ -473,7 +509,7 @@ do
                             ;;
                     esac
                     # Ask user if they want to continue
-                    echo "Do you want to continue [y/n]: "
+                    echo -e "\nDo you want to continue [y/n]: "
                     read choice
                 done
                 echo "Exsit form teacher"
@@ -484,6 +520,6 @@ do
             ;;
     esac
     # Ask user if they want to continue
-    echo "Do you want to continue [y/n]: "
+    echo -e "\nDo you want to continue [y/n]: "
     read choice
 done
