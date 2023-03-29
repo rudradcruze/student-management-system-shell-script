@@ -357,7 +357,8 @@ function view_students_info_admin() {
     OLDIFS=$IFS
     IFS=','
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
-    [ ! -f $INPUTCOURSEENROLLMENT ] && { echo "$INPUTTEACHER file not found"; exit; }
+    [ ! -f $INPUTCOURSEENROLLMENT ] && { echo "$INPUTCOURSEENROLLMENT file not found"; exit; }
+    [ ! -f $INPUTCOURSE ] && { echo "$INPUTCOURSE file not found"; exit; }
     while read student_student_id student_student_name
     do
         counting=`expr $counting + 1`
@@ -378,6 +379,49 @@ function view_students_info_admin() {
             done < $INPUTCOURSE
         done < $INPUTCOURSEENROLLMENT        
     done < $INPUT
+    IFS=$OLDIFS
+}
+
+function view_students_search() {
+    echo -e "======================================================= Search Students =======================================================\n"
+    echo "Enter student id:"
+    read user_search_student_id
+
+    echo -e "Sl: ID\t\tName\t\t\tCourse Code\tCourse Name\t\tTeacher\t\tAttendance\tQuiz\tMid\tFinal\n"
+    INPUTCOURSEENROLLMENT=courseEnroll.csv
+    INPUTCOURSE=course.csv
+    local counting=0
+    OLDIFS=$IFS
+    IFS=','
+    [ ! -f $INPUTCOURSEENROLLMENT ] && { echo "$INPUTCOURSEENROLLMENT file not found"; exit; }
+    [ ! -f $INPUTCOURSE ] && { echo "$INPUTCOURSE file not found"; exit; }
+
+        counting=`expr $counting + 1`
+
+        return_function_value student $user_search_student_id 2
+        local file_student_name=$function_return_value
+
+        if [ $file_student_name == 0 ]
+        then
+            echo "$user_search_student_id doesn't exsist" 
+            exit
+        fi
+
+        echo -e "$counting : $user_search_student_id\t$file_student_name"
+
+        while read en_course_id en_student_id en_semester en_attendance en_quiz en_mid en_final
+        do
+            while read course_course_id course_course_name course_semester course_teacher_id
+            do
+                if [ $user_search_student_id == $en_student_id ] && [ $en_course_id == $course_course_id ] && [ $en_semester == $course_semester ]
+                then
+                    return_function_value teacher $course_teacher_id 2
+                    local file_teacher_name=$function_return_value
+
+                    echo -e "\t\t\t$en_semester\t$course_course_id\t\t$course_course_name\t$file_teacher_name\t\t$en_attendance\t\t$en_quiz\t$en_mid\t$en_final"
+                fi
+            done < $INPUTCOURSE
+        done < $INPUTCOURSEENROLLMENT
     IFS=$OLDIFS
 }
 
@@ -450,6 +494,10 @@ do
                         4)
                             head_banner
                             view_students_info_admin
+                            ;;
+                        5)
+                            head_banner
+                            view_students_search
                             ;;
                         6)
                             head_banner
