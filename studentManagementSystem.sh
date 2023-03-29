@@ -22,8 +22,11 @@ function return_function_value() {
             elif [ $3 == 2 ]
             then
                 function_return_value="$name"
-            else [ $3 == 3 ]
+            elif [ $3 == 3 ]
+            then
                 function_return_value="$ex"
+            else [ $4 == 4 ]
+                function_return_value="$ex1"
             fi
             break
         fi
@@ -184,13 +187,12 @@ function delete_student() {
 
 function return_course_count() {
     INPUT=courseEnroll.csv
-    local return_course_cunt_value=0
     OLDIFS=$IFS
+    local return_course_cunt_value=0
     IFS=','
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
     while read course_id student_id semester attendance quiz mid final
     do
-
         if [ $course_id == $1 ]
         then
             return_course_cunt_value=`expr $return_course_cunt_value + 1`
@@ -201,14 +203,14 @@ function return_course_count() {
 }
 
 function view_courses() {
-    echo -e "=================================== View Courses ===================================\n"
+    echo -e "=============================================  View Courses =============================================\n"
     echo -e "Sl: ID\t\tName\t\t\tSemester\tTeacher Id\tTeacher\tName\tEnrolled Students\n"
     INPUT=course.csv
+    INPUTCOURSEENROLL=courseEnroll.csv
     local counting=0
     OLDIFS=$IFS
     IFS=','
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
-    [ ! -f $INPUTTEACHER ] && { echo "$INPUTTEACHER file not found"; exit; }
     while read course_id course_name semester teacher_id
     do
         local temp_course_id=$course_id
@@ -220,9 +222,8 @@ function view_courses() {
 
         return_course_count $course_id
         local course_count=$?
-
-        echo -e "$counting : $temp_course_id\t$course_name\t$temp_semester\t$teacher_id\t\t$file_teacher_name\t\t$course_count"
         
+        echo -e "$counting : $temp_course_id\t$course_name\t$temp_semester\t$teacher_id\t\t$file_teacher_name\t\t$course_count"
     done < $INPUT
     IFS=$OLDIFS
 }
@@ -236,22 +237,28 @@ function enroll_course() {
     read user_semester
 
     return_function_value semester $user_semester 1
-    semesterExsist=$function_return_value
+    local semesterExsist=$function_return_value
 
     return_function_value student $user_student_id 2
-    studentExsist=$function_return_value
+    local studentExsist=$function_return_value
 
     return_function_value course $user_course_id 2
-    courseExsist=$function_return_value
+    local courseExsist=$function_return_value
 
-    if [ $semesterExsist == 0 ]; then
+    if [ $semesterExsist == 0 ]
+    then
         echo "Semester doesn't exsist"
+        exit
     else
-        if [ $studentExsist == 0 ]; then
+        if [ $studentExsist == 0 ]
+        then
             echo "Student doesn't exsist"
+            exit
         else
-            if [ $courseExsist == 0 ]; then
+            if [ $courseExsist == 0 ]
+            then
                 echo "Course doesn't exsist"
+                exit
             else
                 echo "$user_course_id,$user_student_id,$user_semester,0,0,0,0" >> courseEnroll.csv
                 echo "Student Successfully Enroll into the course" 
@@ -340,6 +347,40 @@ function teacher_course_students_marks() {
     IFS=$OLDIFS
 }
 
+function view_students_info_admin() {
+    echo -e "======================================================= View Students =======================================================\n"
+    echo -e "Sl: ID\t\tName\t\t\tCourse Code\tCourse Name\t\tTeacher\t\tAttendance\tQuiz\tMid\tFinal\n"
+    INPUT=student.csv
+    INPUTCOURSEENROLLMENT=courseEnroll.csv
+    INPUTCOURSE=course.csv
+    local counting=0
+    OLDIFS=$IFS
+    IFS=','
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+    [ ! -f $INPUTCOURSEENROLLMENT ] && { echo "$INPUTTEACHER file not found"; exit; }
+    while read student_student_id student_student_name
+    do
+        counting=`expr $counting + 1`
+
+        echo -e "$counting : $student_student_id\t$student_student_name"
+
+        while read en_course_id en_student_id en_semester en_attendance en_quiz en_mid en_final
+        do
+            while read course_course_id course_course_name course_semester course_teacher_id
+            do
+                if [ $student_student_id == $en_student_id ] && [ $en_course_id == $course_course_id ] && [ $en_semester == $course_semester ]
+                then
+                    return_function_value teacher $course_teacher_id 2
+                    local file_teacher_name=$function_return_value
+
+                    echo -e "\t\t\t$en_semester\t$course_course_id\t\t$course_course_name\t$file_teacher_name\t\t$en_attendance\t\t$en_quiz\t$en_mid\t$en_final"
+                fi
+            done < $INPUTCOURSE
+        done < $INPUTCOURSEENROLLMENT        
+    done < $INPUT
+    IFS=$OLDIFS
+}
+
 # main program
 choice="y"
 while [ $choice == "y" ] || [ $choice == "Y" ]
@@ -372,18 +413,19 @@ do
                     echo -e "= 2.  View Teachers\t\t\t ="
                     echo -e "= 3.  Create Student\t\t\t ="
                     echo -e "= 4.  View Students\t\t\t ="
+                    echo -e "= 5.  Search Students Info\t\t ="
                     echo -e "=\t\t\t\t\t ="
                     echo "=============== Course Work =============="
                     echo -e "=\t\t\t\t\t ="
-                    echo -e "= 5.  Create Semester\t\t\t ="
-                    echo -e "= 6.  View Semesters\t\t\t ="
-                    echo -e "= 7.  Create Course\t\t\t ="
-                    echo -e "= 8.  View Courses\t\t\t ="
-                    echo -e "= 9.  Modify course teacher\t\t ="
-                    echo -e "= 10. Enroll students into the course\t ="
-                    echo -e "= 11. View Students Course Enrollments\t ="
-                    echo -e "= 12. Delete Student\t\t\t ="
-                    echo -e "= 13. Exit\t\t\t\t ="
+                    echo -e "= 6.  Create Semester\t\t\t ="
+                    echo -e "= 7.  View Semesters\t\t\t ="
+                    echo -e "= 8.  Create Course\t\t\t ="
+                    echo -e "= 9.  View Courses\t\t\t ="
+                    echo -e "= 10. Modify course teacher\t\t ="
+                    echo -e "= 11. Enroll students into the course\t ="
+                    echo -e "= 12. View Students Course Enrollments\t ="
+                    echo -e "= 13. Delete Student\t\t\t ="
+                    echo -e "= 14. Exit\t\t\t\t ="
                     echo "=========================================="
                     echo "Please enter your choice:"
                     
@@ -407,49 +449,48 @@ do
                             ;;
                         4)
                             head_banner
-                            echo "==== View students ===="
-                            cat -b student.csv
+                            view_students_info_admin
                             ;;
-                        5)
+                        6)
                             head_banner
                             echo "==== Create new semester ===="
                             create_semester
                             ;;
-                        6)
+                        7)
                             head_banner
                             echo "==== View semester ===="
                             cat -b semester.csv
                             ;;
-                        7)
+                        8)
                             head_banner
                             echo "==== Create new Course ===="
                             create_course
                             ;;
-                        8)
+                        9)
                             head_banner
                             view_courses
                             ;;
-                        9)
+                        10)
                             head_banner
                             echo "==== Modify Course Teacher ===="
                             modify_teacher
                             ;;
-                        10)
+                        11)
                             head_banner
                             echo "==== Enroll into the course ===="
                             enroll_course
                             ;;
-                        11)
+                        12)
                             head_banner
                             echo "==== View Student Course Enrollment ===="
                             view_course_enrollments               
                             ;;
-                        12)
+                        13)
                             head_banner
                             echo "==== Delete Student ===="
                             delete_student
                             ;;
-                        13)
+                        14)
                             exit
                             ;;
                         *)
