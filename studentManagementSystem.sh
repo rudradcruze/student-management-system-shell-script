@@ -5,7 +5,7 @@ function create_semester() {
     read semester_session
     echo "Enter the semester year:"
     read semester_year
-    semester="$semester_session-$semester_year"
+    semester="$semester_session$semester_year"
     echo "$semester" >> semester.csv
 }
 
@@ -30,9 +30,17 @@ function return_function_value() {
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
     while read id name ex ex1
     do
-        if [ "$2" == "$id" ]
+        if [ $2 == $id ]
         then
-            function_return_value="$name"
+            if [ $3 == 1 ]
+            then
+                function_return_value="$id"
+            elif [ $3 == 2 ]
+            then
+                function_return_value="$name"
+            else [ $3 == 3 ]
+                function_return_value="$ex"
+            fi
             break
         fi
     done < $INPUT
@@ -51,24 +59,28 @@ function create_course() {
     echo "Enter teacher id:"
     read user_teacher_id
     echo "Enter sesmster(Spring-2023):"
-    read semester
+    read create_course_semester
 
-    return_function_value teacher $user_teacher_id
+    return_function_value teacher $user_teacher_id 2
     reaturn_value_teacher=$function_return_value
 
-    return_function_value semester $semester
+    return_function_value semester $create_course_semester 1
     reaturn_value_semester=$function_return_value
 
     if [ $reaturn_value_teacher != 0 ]
     then
         if [ $reaturn_value_semester != 0 ]
         then
-            echo "$course_id,$course_name,$semester,$user_teacher_id" >> course.csv
+            echo "$course_id,$course_name,$create_course_semester,$user_teacher_id" >> course.csv
+            echo "Course Create Successfully"
+            view_courses
         else
             echo "Semester doesn't exsist"
+            exit
         fi
     else
         echo "Teacher doesn't exsist"
+        exit
     fi
 }
 
@@ -81,7 +93,7 @@ function modify_teacher() {
     echo "Enter new teacher id:"
     read user_new_teacher_id
 
-    return_function_value teacher $user_new_teacher_id
+    return_function_value teacher $user_new_teacher_id 2
     reaturn_value_teacher=$function_return_value
 
     if [ $reaturn_value_teacher != 0 ]
@@ -113,10 +125,12 @@ function modify_teacher() {
 }
 
 function delete_student() {
+    cat -b student.csv
+
     echo "Enter student id:"
     read user_delete_student_id
 
-    return_function_value student $user_delete_student_id
+    return_function_value student $user_delete_student_id 2
     reaturn_value_delete_student=$function_return_value
 
     if [ $reaturn_value_delete_student != 0 ]
@@ -148,7 +162,7 @@ function delete_student() {
 
 function view_courses() {
     echo "==== View Courses ===="
-    echo "Sl: ID      Name                 Semester      Teacher"
+    echo -e "Sl: ID\t\tName\t\t\tSemester\tTeacher Id\tTeacher\tName"
     INPUT=course.csv
     INPUTTEACHER=teacher.csv
     counting=0
@@ -159,10 +173,10 @@ function view_courses() {
     while read course_id course_name semester teacher_id
     do
         counting=`expr $counting + 1`
-        return_function_value teacher $teacher_id
+        return_function_value teacher $teacher_id 2
         file_teacher_name=$function_return_value
 
-        echo "$counting : $course_id  $course_name     $semester   $file_teacher_name"
+        echo -e "$counting : $course_id\t$course_name\t$semester\t$teacher_id\t\t$file_teacher_name"
     done < $INPUT
     IFS=$OLDIFS
 }
@@ -175,13 +189,13 @@ function enroll_course() {
     echo "Enter semester (Spring-2023):"
     read user_semester
 
-    return_function_value semester $user_semester
+    return_function_value semester $user_semester 1
     semesterExsist=$function_return_value
 
-    return_function_value student $user_student_id
+    return_function_value student $user_student_id 2
     studentExsist=$function_return_value
 
-    return_function_value course $user_course_id
+    return_function_value course $user_course_id 2
     courseExsist=$function_return_value
 
     if [ $semesterExsist == 0 ]; then
@@ -215,9 +229,9 @@ function view_course_enrollments() {
     while read course_id student_id semester attendance quiz midterm final
     do
         counting_course_enroll_view=`expr $counting_course_enroll_view + 1`
-        return_function_value course $course_id
+        return_function_value course $course_id 2
         course_enrollment_course_name=$function_return_value
-        return_function_value student $student_id
+        return_function_value student $student_id 2
         course_enrollment_student_name=$function_return_value
 
         echo "$counting_course_enroll_view : $student_id     $course_enrollment_student_name $semester   $course_enrollment_course_name" 
@@ -245,7 +259,7 @@ function teacher_course_enrolled_students() {
         do
             if [ $course_id == $course_course_id ] && [ $semester == $course_semester ] && [ $1 == $course_teacher_id ]
             then
-                return_function_value student $student_id
+                return_function_value student $student_id 2
                 teacher_course_enrolled_student_name=$function_return_value
 
                 echo "$counting_course_enrolld_student_view : $student_id     $teacher_course_enrolled_student_name $semester   $course_course_id     $course_course_name" 
@@ -342,7 +356,6 @@ do
                             head_banner
                             echo "==== Create new Course ===="
                             create_course
-                            echo "Course Create Successfully"
                             ;;
                         4)
                             head_banner
@@ -351,7 +364,7 @@ do
                         5)
                             head_banner
                             echo "==== Create new teacher ===="
-                            create_objects teacher
+                            create_user teacher
                             ;;
                         6)
                             head_banner
@@ -361,7 +374,7 @@ do
                         7)
                             head_banner
                             echo "==== Create new student ===="
-                            create_objects student
+                            create_user student
                             ;;
                         8)
                             head_banner
@@ -408,7 +421,7 @@ do
             echo "Enter teacher id: "
             read teacher_id_for_teacher
             
-            return_function_value teacher $teacher_id_for_teacher
+            return_function_value teacher $teacher_id_for_teacher 2
             teacher_teacher_exsist_entry=$function_return_value
 
             if [ $teacher_teacher_exsist_entry == 0 ]
