@@ -255,6 +255,36 @@ function teacher_course_enrolled_students() {
     IFS=$OLDIFS
 }
 
+function teacher_course_students_marks() {
+    echo "Enter student id:"
+    read teacher_update_student_id
+    echo "Enter course id:"
+    read teacher_update_course_id
+    echo "Enter semester(Spring-2023):"
+    read teacher_update_semester
+
+    INPUT=courseEnroll.csv
+    INPUTCOURSE=course.csv
+    OLDIFS=$IFS
+    IFS=','
+
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
+    [ ! -f $INPUTCOURSE ] && { echo "$INPUTCOURSE file not found"; exit; }
+
+    while read course_id student_id semester attendance quiz midterm final
+    do
+
+        while read course_course_id course_course_name course_semester course_teacher_id
+        do
+            if [ $course_id == $teacher_update_course_id ] && [ $teacher_update_student_id == $student_id ] && [ $teacher_update_semester == $semester ] && [ $course_id == $course_course_id ] && [ $semester == $course_semester ] && [ $1 == $course_teacher_id ]
+            then
+                echo "Hello i am in"
+            fi
+        done < $INPUTCOURSE
+    done < $INPUT
+    IFS=$OLDIFS
+}
+
 # main program
 choice="y"
 while [ $choice == "y" ] || [ $choice == "Y" ]
@@ -404,6 +434,11 @@ do
                             head_banner
                             echo "==== View teacher course enrolled students ===="
                             teacher_course_enrolled_students $teacher_id_for_teacher
+                            ;;
+                        2)
+                            head_banner
+                            echo "==== Update or insert student marks ===="
+                            teacher_course_students_marks $teacher_id_for_teacher
                             ;;
                         3)
                             exit
