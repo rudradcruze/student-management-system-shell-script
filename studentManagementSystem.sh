@@ -1,25 +1,8 @@
 #!/bin/bash
 
-function create_semester() {
-    echo "Enter the semester session(Spring/Fall):"
-    read semester_session
-    echo "Enter the semester year:"
-    read semester_year
-    semester="$semester_session$semester_year"
-    echo "$semester" >> semester.csv
-}
-
-function create_user() {
-    echo "Enter $1 id:"
-    read user_id
-    echo "Enter $1 name:"
-    read user_name
-    if [ $1 == "teacher" ]
-    then
-        echo "$user_id,$user_name" >> teacher.csv 
-    else 
-        echo "$user_id,$user_name" >> student.csv 
-    fi
+function head_banner() {
+    clear
+    banner SMS
 }
 
 function return_function_value() {
@@ -48,6 +31,40 @@ function return_function_value() {
     if [[ $function_return_value == "" ]];
     then 
         function_return_value=0
+    fi
+}
+
+function create_semester() {
+    echo "Enter the semester session(Spring/Fall):"
+    read semester_session
+    echo "Enter the semester year:"
+    read semester_year
+    semester="$semester_session-$semester_year"
+
+    return_function_value semester $semester 1
+    local create_semester_value_exsist=$function_return_value
+
+    if [ "$create_semester_value_exsist" != "$semester" ]
+    then
+        echo "$semester" >> semester.csv
+        echo "$semester Semester Create successfully, Semester's are:"
+
+        cat -b semester.csv
+    else
+        echo "Semester Already Exsist"
+    fi
+}
+
+function create_user() {
+    echo "Enter $1 id:"
+    read user_id
+    echo "Enter $1 name:"
+    read user_name
+    if [ $1 == "teacher" ]
+    then
+        echo "$user_id,$user_name" >> teacher.csv 
+    else 
+        echo "$user_id,$user_name" >> student.csv 
     fi
 }
 
@@ -212,11 +229,6 @@ function enroll_course() {
             fi
         fi
     fi
-}
-
-function head_banner() {
-    clear
-    banner SMS
 }
 
 function view_course_enrollments() {
