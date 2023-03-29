@@ -3,7 +3,7 @@
 function head_banner() {
     clear
     banner SMS
-    echo "Developed by (social media domain)/rudradcruze [All rights reserved]"
+    echo "Developed by (linkedin.com/in/rudradcruze) or '@rudradcruze' [All rights reserved]"
 }
 
 function return_function_value() {
@@ -245,25 +245,13 @@ function enroll_course() {
     return_function_value course $user_course_id 2
     local courseExsist=$function_return_value
 
-    if [ $semesterExsist == 0 ]
+    if [ $semesterExsist == 0 ] || [ $studentExsist == 0 ] || [ $courseExsist == 0 ]
     then
-        echo "Semester doesn't exsist"
+        echo "Semester, Student, Cources may not exsist."
         exit
     else
-        if [ $studentExsist == 0 ]
-        then
-            echo "Student doesn't exsist"
-            exit
-        else
-            if [ $courseExsist == 0 ]
-            then
-                echo "Course doesn't exsist"
-                exit
-            else
-                echo "$user_course_id,$user_student_id,$user_semester,0,0,0,0" >> courseEnroll.csv
-                echo "Student Successfully Enroll into the course" 
-            fi
-        fi
+        echo "$user_course_id,$user_student_id,$user_semester,0,0,0,0" >> courseEnroll.csv
+        echo "Student Successfully Enroll into the course"
     fi
 }
 
@@ -289,7 +277,7 @@ function view_course_enrollments() {
 }
 
 function teacher_course_enrolled_students() {
-    echo "Sl: SID      Name                  Semester      CID        Course Name"
+    echo -e "Sl: SID\t\tName\t\t\tSemester\t  CID\t\tCourse Name\t\tAttendance\tQuiz\tMidterm\tFinal"
     INPUT=courseEnroll.csv
     INPUTCOURSE=course.csv
     counting_course_enrolld_student_view=0
@@ -310,7 +298,7 @@ function teacher_course_enrolled_students() {
                 return_function_value student $student_id 2
                 teacher_course_enrolled_student_name=$function_return_value
 
-                echo "$counting_course_enrolld_student_view : $student_id     $teacher_course_enrolled_student_name $semester   $course_course_id     $course_course_name" 
+                echo -e "$counting_course_enrolld_student_view : $student_id\t$teacher_course_enrolled_student_name\t$semester\t  $course_course_id\t$course_course_name\t$attendance\t\t$quiz\t$midterm\t$final" 
             fi
         done < $INPUTCOURSE
     done < $INPUT
