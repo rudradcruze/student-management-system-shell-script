@@ -68,10 +68,12 @@ function create_user() {
     then
         if [ $1 == "teacher" ]
         then
-            echo "$user_id,$user_name" >> teacher.csv 
+            echo "$user_id,$user_name" >> teacher.csv
         else 
             echo "$user_id,$user_name" >> student.csv 
         fi
+
+        echo "$user_id $1 create successfully"
     else
         echo "$user_id is already exsist in $1 table"
     fi
@@ -144,6 +146,8 @@ function modify_teacher() {
         # Remove the previous file and rename the exsisting file.
         rm course.csv
         mv temp_course.csv course.csv
+
+        view_courses
     else
         echo "Teacher dosen't exsist"
     fi
@@ -256,7 +260,8 @@ function enroll_course() {
 }
 
 function view_course_enrollments() {
-    echo "Sl: SID      SName                 Semester      Course Name"
+    echo "====================== View Student Course Enrollment ======================"
+    echo -e "Sl: SID      SName                       Semester         Course Name\n"
     INPUT=courseEnroll.csv
     counting_course_enroll_view=0
     OLDIFS=$IFS
@@ -270,7 +275,7 @@ function view_course_enrollments() {
         return_function_value student $student_id 2
         course_enrollment_student_name=$function_return_value
 
-        echo "$counting_course_enroll_view : $student_id     $course_enrollment_student_name $semester   $course_enrollment_course_name" 
+        echo "$counting_course_enroll_view : $student_id     $course_enrollment_student_name                   $semester           $course_enrollment_course_name" 
 
     done < $INPUT
     IFS=$OLDIFS
@@ -513,12 +518,12 @@ do
                             ;;
                         11)
                             head_banner
-                            echo "==== Enroll into the course ===="
+                            view_courses
+                            echo -e "\n=============== Enroll into the course ===============\n"
                             enroll_course
                             ;;
                         12)
                             head_banner
-                            echo "==== View Student Course Enrollment ===="
                             view_course_enrollments               
                             ;;
                         13)
@@ -576,6 +581,8 @@ do
                         2)
                             head_banner
                             echo "==== Update or insert student marks ===="
+                            teacher_course_enrolled_students $teacher_id_for_teacher
+                            echo -e "\n\n"
                             teacher_course_students_marks $teacher_id_for_teacher
                             ;;
                         3)
