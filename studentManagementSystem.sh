@@ -282,10 +282,10 @@ function view_course_enrollments() {
 }
 
 function teacher_course_enrolled_students() {
-    echo -e "Sl: SID\t\tName\t\t\tSemester\t  CID\t\tCourse Name\t\tAttendance\tQuiz\tMidterm\tFinal"
+    echo -e "Sl: SID\t\tName\t\tSemester\t  CID\t\tCourse Name\t\tAttendance\tQuiz\tMidterm\tFinal"
     INPUT=courseEnroll.csv
     INPUTCOURSE=course.csv
-    counting_course_enrolld_student_view=0
+    local counting_course_enrolld_student_view=0
     OLDIFS=$IFS
     IFS=','
 
@@ -326,18 +326,45 @@ function teacher_course_students_marks() {
     [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit; }
     [ ! -f $INPUTCOURSE ] && { echo "$INPUTCOURSE file not found"; exit; }
 
+    echo "Enter attendacne marks(Max 15):"
+    read update_student_attendance_marks
+    echo "Enter quiz marks(max 15):"
+    read update_student_quiz_marks
+    echo "Enter midterm marks(max 30):"
+    read update_student_mid_marks
+    echo "Enter final marks(max 40):"
+    read update_student_final_marks
+
+    if [ $update_student_attendance_marks -gt 15 ] || [ $update_student_quiz_marks -gt 15 ] || [ $update_student_mid_marks -gt 30 ] || [ $update_student_final_marks -gt 40 ]
+    then
+        echo -e "\aPlease check the maximum number barrier"
+        exit
+    fi
+
     while read course_id student_id semester attendance quiz midterm final
     do
-
+        flag="false"
         while read course_course_id course_course_name course_semester course_teacher_id
         do
             if [ $course_id == $teacher_update_course_id ] && [ $teacher_update_student_id == $student_id ] && [ $teacher_update_semester == $semester ] && [ $course_id == $course_course_id ] && [ $semester == $course_semester ] && [ $1 == $course_teacher_id ]
             then
-                echo "Hello i am in"
+                echo -e "\aStudent accssed"
+                # Take marks input from users
+                echo "$teacher_update_course_id,$teacher_update_student_id,$teacher_update_semester,$update_student_attendance_marks,$update_student_quiz_marks,$update_student_mid_marks,$update_student_final_marks" >> tempCourseEnroll.csv
+                echo "Marks update successfully"
+                flag="done"
             fi
         done < $INPUTCOURSE
+        if [ $flag != "done" ]
+        then
+            echo "$course_id,$student_id,$semester,$attendance,$quiz,$midterm,$final" >> tempCourseEnroll.csv
+        fi
     done < $INPUT
     IFS=$OLDIFS
+
+    # Remove the previous file and rename the exsisting file.
+    rm courseEnroll.csv
+    mv tempCourseEnroll.csv courseEnroll.csv
 }
 
 function view_students_info_admin() {
