@@ -282,7 +282,7 @@ function view_course_enrollments() {
 }
 
 function teacher_course_enrolled_students() {
-    echo -e "Sl: SID\t\tName\t\tSemester\t  CID\t\tCourse Name\t\tAttendance\tQuiz\tMidterm\tFinal"
+    echo -e "Sl: SID\t\tName\t\tSemester\t  CID\t\tCourse Name\t\t(Attendance,quiz,Mid,Final)"
     INPUT=courseEnroll.csv
     INPUTCOURSE=course.csv
     local counting_course_enrolld_student_view=0
@@ -303,7 +303,7 @@ function teacher_course_enrolled_students() {
                 return_function_value student $student_id 2
                 teacher_course_enrolled_student_name=$function_return_value
 
-                echo -e "$counting_course_enrolld_student_view : $student_id\t$teacher_course_enrolled_student_name\t$semester\t  $course_course_id\t$course_course_name\t$attendance\t\t$quiz\t$midterm\t$final" 
+                echo -e "$counting_course_enrolld_student_view : $student_id\t$teacher_course_enrolled_student_name\t$semester\t  $course_course_id\t$course_course_name\t$attendance,$quiz,$midterm,$final" 
             fi
         done < $INPUTCOURSE
     done < $INPUT
@@ -369,7 +369,7 @@ function teacher_course_students_marks() {
 
 function view_students_info_admin() {
     echo -e "======================================================= View Students =======================================================\n"
-    echo -e "Sl: ID\t\tName\t\t\tCourse Code\tCourse Name\t\tTeacher\t\tAttendance\tQuiz\tMid\tFinal\n"
+    echo -e "Sl: ID\t\tName\t\t\tCourse Code\tCourse Name\t\tTeacher\t\t(Attendance,quiz,Mid,Final)\n"
     INPUT=student.csv
     INPUTCOURSEENROLLMENT=courseEnroll.csv
     INPUTCOURSE=course.csv
@@ -394,10 +394,11 @@ function view_students_info_admin() {
                     return_function_value teacher $course_teacher_id 2
                     local file_teacher_name=$function_return_value
 
-                    echo -e "\t\t\t$en_semester\t$course_course_id\t\t$course_course_name\t$file_teacher_name\t\t$en_attendance\t\t$en_quiz\t$en_mid\t$en_final"
+                    echo -e "\t\t\t$en_semester\t$course_course_id\t\t$course_course_name\t$file_teacher_name\t\t$en_attendance,$en_quiz,$en_mid,$en_final"
                 fi
             done < $INPUTCOURSE
-        done < $INPUTCOURSEENROLLMENT        
+        done < $INPUTCOURSEENROLLMENT
+        echo ""      
     done < $INPUT
     IFS=$OLDIFS
 }
@@ -407,7 +408,7 @@ function view_students_search() {
     echo "Enter student id:"
     read user_search_student_id
 
-    echo -e "Sl: ID\t\tName\t\t\tCourse Code\tCourse Name\t\tTeacher\t\tAttendance\tQuiz\tMid\tFinal\n"
+    echo -e "Sl: ID\t\tName\t\t\tCourse Code\tCourse Name\t\tTeacher\t\t(Attendance,quiz,Mid,Final)\n"
     INPUTCOURSEENROLLMENT=courseEnroll.csv
     INPUTCOURSE=course.csv
     local counting=0
@@ -438,11 +439,81 @@ function view_students_search() {
                     return_function_value teacher $course_teacher_id 2
                     local file_teacher_name=$function_return_value
 
-                    echo -e "\t\t\t$en_semester\t$course_course_id\t\t$course_course_name\t$file_teacher_name\t\t$en_attendance\t\t$en_quiz\t$en_mid\t$en_final"
+                    echo -e "\t\t\t$en_semester\t$course_course_id\t\t$course_course_name\t$file_teacher_name\t\t$en_attendance,$en_quiz,$en_mid,$en_final"
                 fi
             done < $INPUTCOURSE
         done < $INPUTCOURSEENROLLMENT
     IFS=$OLDIFS
+}
+
+function greade_return() {
+    sum=`expr $1 + $2 + $3 + $4`
+    
+    if [ $sum -ge 80 ]; then
+    	greade_show="A+"
+    elif [ $sum -ge 75 ]; then
+    	greade_show="A"
+    elif [ $sum -ge 70 ]; then
+    	greade_show="A-"
+    elif [ $sum -ge 65 ]; then
+    	greade_show="B+"
+    elif [ $sum -ge 60 ]; then
+    	greade_show="B"
+    elif [ $sum -ge 55 ]; then
+    	greade_show="B-"
+    elif [ $sum -ge 50 ]; then
+    	greade_show="C+"
+    elif [ $sum -ge 45 ]; then
+    	greade_show="C"
+    elif [ $sum -ge 40 ]; then
+    	greade_show="D"
+    else
+    	greade_show="F"
+    fi
+}
+
+function view_single_student() {
+    echo -e "============================================================ Students =============================================================\n"
+    echo -e "Sl: ID\t\tName\t\t\tCourse Code\tCourse Name\t\tTeacher\t\t(Attendance,quiz,Mid,Final) = Grade\n"
+    INPUTCOURSEENROLLMENT=courseEnroll.csv
+    INPUTCOURSE=course.csv
+    local counting=0
+    OLDIFS=$IFS
+    IFS=','
+    [ ! -f $INPUTCOURSEENROLLMENT ] && { echo "$INPUTCOURSEENROLLMENT file not found"; exit; }
+    [ ! -f $INPUTCOURSE ] && { echo "$INPUTCOURSE file not found"; exit; }
+
+        counting=`expr $counting + 1`
+
+        return_function_value student $1 2
+        local file_student_name=$function_return_value
+
+        if [ $file_student_name == 0 ]
+        then
+            echo "$1 doesn't exsist" 
+            exit
+        fi
+
+        echo -e "$counting : $1\t$file_student_name"
+
+        while read en_course_id en_student_id en_semester en_attendance en_quiz en_mid en_final
+        do
+            while read course_course_id course_course_name course_semester course_teacher_id
+            do
+                if [ $1 == $en_student_id ] && [ $en_course_id == $course_course_id ] && [ $en_semester == $course_semester ]
+                then
+                    return_function_value teacher $course_teacher_id 2
+                    local file_teacher_name=$function_return_value
+
+                    greade_return $en_attendance $en_quiz $en_mid $en_final
+                    local grade=$greade_show
+
+                    echo -e "\t\t\t$en_semester\t$course_course_id\t\t$course_course_name\t$file_teacher_name\t\t$en_attendance,$en_quiz,$en_mid,$en_final = $grade"
+                fi
+            done < $INPUTCOURSE
+        done < $INPUTCOURSEENROLLMENT
+    IFS=$OLDIFS
+    echo -e "\n===================================================================================================================================\n"
 }
 
 # main program
@@ -581,22 +652,26 @@ do
             return_function_value teacher $teacher_id_for_teacher 2
             teacher_teacher_exsist_entry=$function_return_value
 
-            if [ $teacher_teacher_exsist_entry == 0 ]
+            if [ "$teacher_teacher_exsist_entry" == 0 ]
             then
                 echo "Teacher not exsist"
             else
-                #repeating teacher choice
+                # repeating teacher choice
                 choice="y"
                 while [ $choice == "y" ] || [ $choice == "Y" ]
                 do
                     head_banner
-                    echo "Welcome $teacher_teacher_exsist_entry"
-                    echo "==== Teacher menu ===="
-                    echo "1. View Enroll Stdents"
-                    echo "2. Update Student Marks"
-                    echo "3. Exit"
+
+                    echo -e "\n=========================================="
+                    echo -e "= \t   Welcome $teacher_teacher_exsist_entry\t         ="
+                    echo "============== Teacher menu =============="
+                    echo -e "=\t\t\t\t\t ="
+                    echo -e "= 1.  View Enroll Stdents\t\t ="
+                    echo -e "= 2.  Update Student Marks\t\t ="
+                    echo -e "= 3.  Exit\t\t\t\t ="
+                    echo "=========================================="
                     echo "Please enter your choice:"
-                    
+
                     read choice
 
                     case "$choice" in
@@ -620,17 +695,39 @@ do
                             ;;
                     esac
                     # Ask user if they want to continue
-                    echo -e "\nDo you want to continue [y/n]: "
+                    echo -e "\nDo you want to perfrom another operaion [y/n]: "
                     read choice
                 done
                 echo "Exsit form teacher"
             fi
+            ;;
+        3)
+            echo "Enter student id: "
+            read student_id_for_student
+            
+            return_function_value student $student_id_for_student 2
+            student_return_value=$function_return_value
+
+            if [ "$student_return_value" == 0 ]
+            then
+                echo "Student not exsist"
+            else
+                head_banner
+                echo -e "\n=========================================="
+                echo -e "= Welcome $student_return_value"
+                echo -e "=========================================="
+
+                view_single_student $student_id_for_student
+            fi
+            ;;
+        4)
+            exit
             ;;
         *)
             echo "Invalid Input"
             ;;
     esac
     # Ask user if they want to continue
-    echo -e "\nDo you want to continue [y/n]: "
+    echo -e "\nDo you want to perform another operation [y/n]: "
     read choice
 done
