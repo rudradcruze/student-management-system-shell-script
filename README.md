@@ -1,7 +1,6 @@
 
 # Student Management System
-| ![ GitHub followers ](https://img.shields.io/github/followers/rudradcruze?style=social) | ![ GitHub Repo stars ](https://img.shields.io/github/stars/rudradcruze/student-management-system-shell-script?style=social) | ![ GitHub repo size ](https://img.shields.io/github/repo-size/rudradcruze/student-management-system-shell-script) | ![ YouTube Channel Subscribers ](https://img.shields.io/youtube/channel/subscribers/UCTZN1mzW0AwackW7axf7-OQ?style=social) |
-|-----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+![ GitHub followers ](https://img.shields.io/github/followers/rudradcruze?style=social) ![ GitHub Repo stars ](https://img.shields.io/github/stars/rudradcruze/student-management-system-shell-script?style=social) ![ GitHub repo size ](https://img.shields.io/github/repo-size/rudradcruze/student-management-system-shell-script) ![ YouTube Channel Subscribers ](https://img.shields.io/youtube/channel/subscribers/UCTZN1mzW0AwackW7axf7-OQ?style=social)
 
 This is simple student management system project by using shell scripting. By this project or program we can automate the manual track of student management. For example studnts enrollment, teacher assign, multiple teacher marks update, etc. By this program we can do that easily. Because of using the **CSV** file as the **database** we woulden't loose any data and we can perform operation realtime.
 
@@ -102,10 +101,10 @@ Tech-savvy designer/programmer pushing boundaries of online tech. Passionate abo
 [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rudradcruze)
 [![twitter](https://img.shields.io/badge/twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/rudradcruze)
 [![Facebook](https://img.shields.io/badge/facebook-4267B2?style=for-the-badge&logo=facebook&logoColor=white)](https://facebook.com/rudradcruze)
-[![gmail](https://img.shields.io/badge/francisrudra@gmail.com-4267B2?style=for-the-badge&logo=gmail&logoColor=white)](francisrudra@gmail.com)
+[![francisrudra@gmail.com](https://img.shields.io/badge/gmail-4267B2?style=for-the-badge&logo=gmail&logoColor=white)](mailto:francisrudra@gmail.com)
 
 
 ## License
 
-[MIT](https://github.com/rudradcruze/student-management-system-shell-script/blob/main/LICENSE)
+[MIT License](https://github.com/rudradcruze/student-management-system-shell-script/blob/main/LICENSE)
 
